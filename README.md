@@ -9,5 +9,7 @@ Currently, this repository offers these images:
 * debian:stable (Dockerfile.debian)
 
 ## Build
-To build the image, you select a Dockerfile first (<dockerfile>).
-Then you build it using the following command: ```docker build -f <dockerfile> -t drop:<debian/alpine> .```
+To build the image, you select a Dockerfile first (\<dockerfile\>).
+Then you build it using the following command:
+
+```docker build -f <dockerfile> -t drop:<debian/alpine> .```
