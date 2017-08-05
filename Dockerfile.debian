@@ -1,0 +1,15 @@
+FROM debian:stable
+LABEL maintainer Alexander 'Polynomdivision'
+
+# Build su-exec, since it's not in the repositories
+RUN apt-get update \
+    && apt-get install ca-certificates gcc curl -y \
+    && cd /root/ \
+    && curl -fLo su-exec.c https://raw.githubusercontent.com/ncopa/su-exec/master/su-exec.c \
+    && gcc su-exec.c -o su-exec \
+    && mv su-exec /usr/local/bin/su-exec \
+    && rm su-exec.c \
+    && apt-get purge -y --auto-remove ca-certificates gcc curl
+
+ADD container/drop /usr/local/bin/drop
+RUN chmod 700 /usr/local/bin/drop

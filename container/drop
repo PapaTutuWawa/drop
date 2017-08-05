@@ -1,0 +1,40 @@
+#!/bin/sh
+USERID=${USERID:-9001}
+GROUPID=${GROUPID:-9001}
+USERNAME=${CUSER:-"cuser"}
+
+# If someone tries to use drop to escalate privileges,
+# stop them!
+if [ $USERID -eq 0 ]; then
+   USERID=9001
+   GROUPID=9001
+fi
+
+# Prevent the usage of the username root
+if [ $USERNAME = "root" ]; then
+   USERNAME="cuser"
+fi
+
+# Create the user and his group
+if [ $ALPINE = "no" ]; then
+   # Handle everything that is not Alpine
+   groupadd -g "$GROUPID" container
+   useradd -u "$USERID" -g container \
+   	   --create-home --shell /sbin/nologin \
+	   -G container "$USERNAME"
+else
+   # Handle AlpineLinux
+   addgroup -g "$GROUPID" container
+   adduser -s /sbin/nologin -D -u "$USERID" \
+   	   -G container "$USERNAME"
+fi
+
+# Export the home directory
+export HOME="/home/$USERNAME"
+
+# Let the container user be the owner of his
+# home directory
+chown -R "$USERNAME:container" "$HOME"
+
+# Use su-exec to drop privileges
+su-exec "$USERNAME" $@

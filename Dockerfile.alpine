@@ -1,0 +1,10 @@
+FROM alpine:3.6
+LABEL maintainer Alexander 'Polynomdivision'
+
+RUN apk add --no-cache su-exec
+
+# Add the script we use to drop privilege
+ADD container/drop /usr/local/bin/drop
+# 700, so that the script __cannot__ be used to escalade privileges
+RUN chmod 700 /usr/local/bin/drop
+
