@@ -1,6 +1,9 @@
 FROM debian:stable
 LABEL maintainer Alexander 'Polynomdivision'
 
+# Let drop know that we aren't using AlpineLinux
+ENV ALPINE=no
+
 # Build su-exec, since it's not in the repositories
 RUN apt-get update \
     && apt-get install ca-certificates gcc curl -y \

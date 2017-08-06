@@ -1,6 +1,9 @@
 FROM alpine:3.6
 LABEL maintainer Alexander 'Polynomdivision'
 
+# Let drop know that we use AlpineLinux
+ENV ALPINE=yes
+
 RUN apk add --no-cache su-exec
 
 # Add the script we use to drop privilege
