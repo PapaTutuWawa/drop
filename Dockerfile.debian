@@ -1,4 +1,4 @@
-FROM debian:stable
+FROM debian:stable-slim
 LABEL maintainer Alexander 'Polynomdivision'
 
 # Let drop know that we aren't using AlpineLinux

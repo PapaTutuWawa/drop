@@ -1,40 +1,57 @@
 #!/bin/sh
 USERID=${USERID:-9001}
 GROUPID=${GROUPID:-9001}
-USERNAME=${CUSER:-"cuser"}
+CUSER=${CUSER:-"cuser"}
+UMASK=${UMASK:-077}
+
+# Set a umask
+umask "$UMASK"
 
 # If someone tries to use drop to escalate privileges,
 # stop them!
 if [ $USERID -eq 0 ]; then
-   USERID=9001
-   GROUPID=9001
+    echo "Warning: Trying to drop to UID 0"
+    echo "Falling back to 9001:9001"
+    USERID=9001
+    GROUPID=9001
 fi
 
 # Prevent the usage of the username root
-if [ $USERNAME = "root" ]; then
-   USERNAME="cuser"
+if [ "$CUSER" = "root" ]; then
+    echo "Warning: Trying to use username 'root'"
+    echo "Falling back to username 'cuser'"
+    CUSER="cuser"
 fi
 
 # Create the user and his group
 if [ $ALPINE = "no" ]; then
-   # Handle everything that is not Alpine
-   groupadd -g "$GROUPID" container
-   useradd -u "$USERID" -g container \
-   	   --create-home --shell /sbin/nologin \
-	   -G container "$USERNAME"
+    # Handle everything that is not Alpine
+    groupadd -g "$GROUPID" container
+    useradd -u "$USERID" -g container \
+   	        --create-home --shell /sbin/nologin \
+	        -G container "$CUSER"
 else
-   # Handle AlpineLinux
-   addgroup -g "$GROUPID" container
-   adduser -s /sbin/nologin -D -u "$USERID" \
-   	   -G container "$USERNAME"
+    # Handle AlpineLinux
+    addgroup -g "$GROUPID" container
+    adduser -s /sbin/nologin -D -u "$USERID" \
+   	        -G container "$CUSER"
 fi
 
 # Export the home directory
-export HOME="/home/$USERNAME"
+export HOME="/home/$CUSER"
+
+# Mount the mounts in the user directory
+for file in /mnt/mounts/* ; do
+    if [ -d "$file" ]; then
+        foldername=$(basename "$file")
+        # Only work on directories
+        ln -s "$file" "$HOME/$foldername"
+    fi
+done
 
 # Let the container user be the owner of his
 # home directory
-chown -R "$USERNAME:container" "$HOME"
+chown -R "$CUSER:container" "$HOME"
 
 # Use su-exec to drop privileges
-su-exec "$USERNAME" $@
+su-exec "$CUSER" $@
